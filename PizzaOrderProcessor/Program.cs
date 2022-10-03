@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Azure.Core;
 using PizzaOrderProcessor.models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,14 +40,27 @@ app.MapGet("/order", (string orderId) => {
 });
 
 // Update order status by orderId
-app.MapPost("/order/status", (DaprData<OrderStatus> requestData) => {
+app.MapPost("/order/status", async (DaprData<OrderStatus> requestData) => {
     var orderStatus = requestData.Data;
     // fetch order from storage state store by orderId
-    var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
-    var order = JsonSerializer.Deserialize<Order>(resp.Result)!;
+    var orderLock = new object();
+    var order= new Order();
+
+    lock (orderLock)
+    {
+        var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
+        var orderTmp = JsonSerializer.Deserialize<Order>(resp.Result)!;
+        order.Cart=orderTmp.Cart;
+        order.OrderId=orderTmp.OrderId;
+    }
     // update order status
-    order.Status = orderStatus.Status;
+    lock (orderLock)
+    {
+        order.Status = orderStatus.Status;
+    }
+
     // post the updated order to storage state store
+
     var orderInfoJson = JsonSerializer.Serialize(
         new[] {
             new {
@@ -55,8 +69,12 @@ app.MapPost("/order/status", (DaprData<OrderStatus> requestData) => {
             }
         }
     );
+
     var state = new StringContent(orderInfoJson, Encoding.UTF8, "application/json");
-    httpClient.PostAsync(stateStoreBaseUrl, state);
+
+    await httpClient.PostAsync(stateStoreBaseUrl, state);
+
+ 
     return Results.Ok(order);
 });
 

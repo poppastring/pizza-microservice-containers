@@ -46,6 +46,8 @@ let PUBSUBNAME = process.env.PUBSUBNAME || "pubsub";
 let TOPICNAME = process.env.TOPICNAME || "order";
 // publish endpoint: http://localhost:<daprPort>/v1.0/publish/<pubsubname>/<topic>[?<metadata>]
 const pubsubEndpoint = `${DAPR_HOST}:${DAPR_HTTP_PORT}/v1.0/publish/${PUBSUBNAME}/${TOPICNAME}`;
+let ORDER_PROCESSOR_HTTP_URL = process.env.ORDER_PROCESSOR_HTTP_URL.replace(/\r?\n|\r/g, "") || "http://localhost";
+let ORDER_PROCESSOR_HTTP_PORT = process.env.ORDER_PROCESSOR_HTTP_PORT || "80";
 
 let axiosConfig = {
     headers: {
@@ -71,7 +73,11 @@ app.get('/getOrderStatus', function(req,res){
     console.log("invoked /getOrderStatus GET method");
     console.log("outputting the req order ID: "+ JSON.stringify(req.query["OrderID"]));
     var OrderID = req.query["OrderID"];
-    axios.get(`${DAPR_HOST}:${DAPR_HTTP_PORT}/order?orderId=${OrderID}`, axiosConfig)
+    //axios.get(`${DAPR_HOST}:${DAPR_HTTP_PORT}/order?orderId=${OrderID}`, axiosConfig)
+    console.log("logging the axios get URL: " + `https://${ORDER_PROCESSOR_HTTP_URL}/order?orderId=${OrderID}`);
+    console.log("logging the correct URL: " + `https://order-processor-http.greenforest-85e9abad.westus.azurecontainerapps.io/order?orderId=22`);
+    axios.get(`https://${ORDER_PROCESSOR_HTTP_URL}/order?orderId=${OrderID}`)
+    //axios.get(`https://order-processor-http.greenforest-85e9abad.westus.azurecontainerapps.io/order?orderId=22`)
     .then(function(response){
         console.log("is response body null: ", response.body == null);
         console.log(`statusCode: ${response.status}`);

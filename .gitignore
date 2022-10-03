@@ -12,3 +12,4 @@ aca-dapr-components_local
 components_local_*
 PizzaOrderProcessor/Properties/serviceDependencies.local.json
 PizzaOrderProcessor/Properties/serviceDependencies.local.json.user
+quickstart_local.ps1

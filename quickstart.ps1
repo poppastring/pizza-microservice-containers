@@ -5,7 +5,8 @@
 #Switch parameter
 Param(
     [switch]$noAzureLogin,
-    [switch]$noDockerBuild
+    [switch]$noDockerBuildWeb,
+    [switch]$noDockerBuildProcessor
 )
 
 #Environment variables
@@ -14,8 +15,10 @@ $DOCKERHUB_USERNAME=""
 $RESOURCE_GROUP=""
 $LOCATION=""
 $CONTAINERAPPS_ENVIRONMENT=""
+$DAPR_INSTRUMENTATION_KEY=""
 $LOGANALYTICS_WORKSPACE_ID=""
 $APPLICATIONINSIGHTS_CONNECTION_STRING=""
+$ORDER_PROCESSOR_HTTP_URL=""
 
 #Connnect to an Azure subscription
 if(!$noAzureLogin)
@@ -29,14 +32,19 @@ az provider register --namespace Microsoft.App
 az provider register --namespace Microsoft.OperationalInsights
 
 #Build docker images
-if(!$noDockerBuild)
+if(!$noDockerBuildWeb)
 {
     docker build -t $DOCKERHUB_USERNAME/node-pizza-web-appinsights ./PizzaWeb/.
     docker push $DOCKERHUB_USERNAME/node-pizza-web-appinsights
+}
 
+if(!$noDockerBuildProcessor)
+{
     docker build -t $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights ./PizzaOrderProcessor/.
     docker push $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights
 }
+
+
 
 
 #Create resource group if doesn't exist
@@ -59,7 +67,7 @@ $envExists = $envCheck.Length -gt 0
 if (!$envExists)
 {
     Write-Output "Creating Container App Environment $CONTAINERAPPS_ENVIRONMENT ..."
-    az containerapp env create --name $CONTAINERAPPS_ENVIRONMENT --resource-group $RESOURCE_GROUP --location $LOCATION --logs-workspace-id $LOGANALYTICS_WORKSPACE_ID
+    az containerapp env create --name $CONTAINERAPPS_ENVIRONMENT --resource-group $RESOURCE_GROUP --location $LOCATION --dapr-instrumentation-key $DAPR_INSTRUMENTATION_KEY --logs-workspace-id $LOGANALYTICS_WORKSPACE_ID
 }
 else
 {
@@ -105,7 +113,7 @@ if(!$pizzaprocessingExists)
 }
 else
 {
-    if(!$noDockerBuild)
+    if(!$noDockerBuildProcessor)
     {
         $revisionSuffix = $((get-date).toString("yyyy-mm-dd-hhmmss"))
         Write-output "Creating containerapp order-web revision with suffix $revisionSuffix"
@@ -118,21 +126,23 @@ else
      
 }
 
+$pizzaprocessingCheck = az containerapp list --environment pizzaorderdemo2 --resource-group pizzaorderdemo2 --query "[?name=='order-processor-http']" | ConvertFrom-Json
+$ORDER_PROCESSOR_HTTP_URL=$pizzaprocessingCheck.properties.Configuration.Ingress.fqdn
 #Deploy container app revisions
 $pizzawebCheck = az containerapp list --environment pizzaorderdemo2 --resource-group pizzaorderdemo2 --query "[?name=='order-web']" | ConvertFrom-Json
 $pizzawebExists = $pizzawebCheck.Length -gt 0
 if(!$pizzawebExists)
 {
     Write-Output "Creating containerapp order-web ..."
-    az containerapp create --name order-web --resource-group $RESOURCE_GROUP --environment $CONTAINERAPPS_ENVIRONMENT  --image $DOCKERHUB_USERNAME/node-pizza-web-appinsights:latest --target-port 3000 --ingress external --min-replicas 1 --max-replicas 1 --enable-dapr --dapr-app-id order-web --dapr-app-port 3000 --env-vars `APPLICATIONINSIGHTS_CONNECTION_STRING=$APPLICATIONINSIGHTS_CONNECTION_STRING`
+    az containerapp create --name order-web --resource-group $RESOURCE_GROUP --environment $CONTAINERAPPS_ENVIRONMENT  --image $DOCKERHUB_USERNAME/node-pizza-web-appinsights:latest --target-port 3000 --ingress external --min-replicas 1 --max-replicas 1 --enable-dapr --dapr-app-id order-web --dapr-app-port 3000 --env-vars `APPLICATIONINSIGHTS_CONNECTION_STRING=$APPLICATIONINSIGHTS_CONNECTION_STRING ORDER_PROCESSOR_HTTP_URL=$ORDER_PROCESSOR_HTTP_URL`
 }
 else
 {
-    if(!$noDockerBuild)
+    if(!$noDockerBuildWeb)
     {
         $revisionSuffix = $((get-date).toString("yyyy-mm-dd-hhmmss"))
         Write-output "Creating containerapp order-web revision with suffix $revisionSuffix"
-        az containerapp update --name order-web --resource-group $RESOURCE_GROUP --image $DOCKERHUB_USERNAME/node-pizza-web-appinsights:latest --revision-suffix $revisionSuffix
+        az containerapp update --name order-web --resource-group $RESOURCE_GROUP --image $DOCKERHUB_USERNAME/node-pizza-web-appinsights:latest --revision-suffix $revisionSuffix --set-env-vars `ORDER_PROCESSOR_HTTP_URL=$ORDER_PROCESSOR_HTTP_URL`
     }
     else
     {

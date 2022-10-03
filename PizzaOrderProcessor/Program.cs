@@ -21,7 +21,6 @@ httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTyp
 var pizzamemcache = new Dictionary<string, Order>();
 var cacheWriteLock = new object();
 
-
 if (app.Environment.IsDevelopment()) {app.UseDeveloperExceptionPage();}
 
 // Register Dapr pub/sub subscriptions
@@ -60,30 +59,31 @@ app.MapGet("/order", (string orderId) => {
 app.MapPost("/order/status", async (DaprData<OrderStatus> requestData) => {
     var orderStatus = requestData.Data;
     // fetch order from storage state store by orderId
+    var objectUpdateLock = new object();
     var order = new Order();
 
-    order = pizzamemcache[orderStatus.OrderId.ToString()];
-
-    if (order == null)
+    lock (objectUpdateLock)
     {
-        var respStr = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
-        var resp = await respStr;
-        order = JsonSerializer.Deserialize<Order>(resp)!;
-        lock (cacheWriteLock)
+        order = pizzamemcache[orderStatus.OrderId.ToString()];
+        if (order == null)
         {
-            pizzamemcache.Add(orderStatus.OrderId.ToString(),order);
+            var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
+            order = JsonSerializer.Deserialize<Order>(resp.Result)!;
+            lock (cacheWriteLock)
+            {
+                pizzamemcache.Add(orderStatus.OrderId.ToString(), order);
+                lock (objectUpdateLock)
+                {
+                    // update order status
+                    order.Status = orderStatus.Status;
+                    lock (cacheWriteLock)
+                    {
+                        pizzamemcache.Add(orderStatus.OrderId.ToString(), order);
+                    }
+                }
+            }
         }
     }
-
-    
-    // update order status
-    
-    order.Status = orderStatus.Status;
-    lock (cacheWriteLock)
-    {
-        pizzamemcache.Add(orderStatus.OrderId.ToString(), order);
-    }
-
 
     // post the updated order to storage state store
 

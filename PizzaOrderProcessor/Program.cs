@@ -44,18 +44,17 @@ app.MapPost("/order/status", async (DaprData<OrderStatus> requestData) => {
     var orderStatus = requestData.Data;
     // fetch order from storage state store by orderId
     var orderLock = new object();
-    var order= new Order();
+    var order = new Order();
 
-    lock (orderLock)
-    {
-        var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
-        order = JsonSerializer.Deserialize<Order>(resp.Result)!;
-    }
-    // update order status
-    lock (orderLock)
-    {
+
+        var respStr = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
+        var resp = await respStr;
+        order = JsonSerializer.Deserialize<Order>(resp)!;
+
+        // update order status
+        
         order.Status = orderStatus.Status;
-    }
+
 
     // post the updated order to storage state store
 

@@ -37,29 +37,8 @@ The Pizza Order App demo has the following features:
 * Install [Node.js](https://nodejs.org/download/)
 * Install [.NET 6](https://dotnet.microsoft.com/download/dotnet/6.0)
 * Have a working Azure subscription
-* Create an [Azure Service Bus](https://learn.microsoft.com/azure/service-bus-messaging/service-bus-create-namespace-portal) with *Standard* sku or above. Create a *Topic* called *order*
-```
-az servicebus namespace create --name "your_service_bus_name" --resource-group "your_resource_group_name" --sku Standard
-```
-```
-az servicebus topic create --name "order" --namespace-name "your_service_bus_name" --resource-group "your_resource_group_name"
-```
-
-* Create an [Azure Storage account](https://learn.microsoft.com/azure/storage/common/storage-account-create?tabs=azure-portal). Create a new *blob container*.
-```
-az storage account create --name "your_storage_account_name" --resource-group "your_resource_group_name"
-```
-```
-az storage container create --name "your_container_name" --account-name "your_storage_account_name" --public-access container
-```
-
-* Create an [Application Insights](https://learn.microsoft.com/azure/azure-monitor/app/create-new-resource)
-```
-az extension add -n application-insights
-```
-```
-az monitor app-insights component create --app "your_appinsights_name" --location "your_location" --resource-group "your_resource_group_name"
-```
+* Create dependencies resources used in the app (Azure Service Bus, Storage Account, Log Analytics and App Insights) by edit and run [create-dependencyResources.ps1](./create-dependencyResources.ps1)
+**NOTE: there is a limitation on the script for creating Storage Container. Workaround is manually create the Container in Azure portal**
 
 ## Test Locally
 Download this repository to test the code locally.
@@ -68,7 +47,7 @@ In */components* directory there are two Dapr component files:
 * pubsub.yaml
 * statestore.yaml
 
-Put your Azure service bus connection string in pubsub.yaml and Azure Storage blob info in statestore.yaml.
+Make a copy of the /components folder, name it *components_local* and put your Azure service bus connection string in pubsub.yaml and Azure Storage blob info in statestore.yaml. *components_local* is ignored by this repo so you won't check in your resource keys.
 
 ### Start Dapr process
 ```
@@ -120,75 +99,6 @@ In */aca-dapr-components* directory there are two Dapr component files:
 * pubsub.yaml
 * statestore.yaml
 
-Put your Azure Service Bus connection string in pubsub.yaml and Azure Storage blob container info in statestore.yaml.
+Make a copy of /aca-dapr-components folder and call it *aca-dapr-components_$yourResourceGroup*, replace the variable with the resource group name you will use or create. This ensures the quickstart.ps1 script an execute smoothly and the folder won't be checked in to protect resource secret keys. Put your Azure Service Bus connection string in pubsub.yaml and Azure Storage blob container info in statestore.yaml.
 
-### Login to Azure using Azure CLI
-
-1. Login using your Azure account
-```azure cli
-az login
-```
-2. Select a subscription if your account is associated with multiple subscriptions
-```azure cli
-az account set --s "your subscription ID"
-```
-
-3. Add Azure Container App CLI extenion
-```
-az extension add --name containerapp --upgrade
-```
-
-4. Register Container App namespace in your subscription
-```
-az provider register --namespace Microsoft.App
-```
-
-5. Register Log Analytics workspace in your subscription
-```
-az provider register --namespace Microsoft.OperationalInsights
-```
-
-### Create Azure Container App Environment in Azure
-1. Create environment variables in Command Prompt:
-```azure cli
-set RESOURCE_GROUP="your resource group name"
-set LOCATION="westus"
-set CONTAINERAPPS_ENVIRONMENT="your container app environment name"
-```
-
-2. Create resource group
-```azure cli
-az group create --name %RESOURCE_GROUP% --location %LOCATION%
-```
-
-3. Create Azure Container App Environment
-```azure cli
-az containerapp env create --name %CONTAINERAPPS_ENVIRONMENT% --resource-group %RESOURCE_GROUP% --location %LOCATION% --dapr-instrumentation-key your_appinsights_key --logs-workspace-id your_workspace_id
-```
-
-### Deploy Dapr component
-Change directory to */aca-dapr-components*
-
-1. Deploy session state store
-```
-az containerapp env dapr-component set --name %CONTAINERAPPS_ENVIRONMENT% --resource-group %RESOURCE_GROUP% --dapr-component-name statestore --yaml statestore.yaml
-```
-
-2. Deploy pubsub 
-```
-az containerapp env dapr-component set --name %CONTAINERAPPS_ENVIRONMENT% --resource-group %RESOURCE_GROUP% --dapr-component-name pubsub --yaml pubsub.yaml
-```
-
-### Deploy Node.js webapp
-Assuming container images has been built using the dockerfile in PizzaWeb and pushed to Dockerhub.
-
-```
-az containerapp create --name order-web --resource-group %RESOURCE_GROUP% --environment %CONTAINERAPPS_ENVIRONMENT%  --image <your docker hub account>/node-pizza-web-appinsights:latest --target-port 3000 --ingress external --min-replicas 1 --max-replicas 1 --enable-dapr --dapr-app-id order-web --dapr-app-port 3000 --env-vars "APPLICATIONINSIGHTS_CONNECTION_STRING=<your_appinsights_connectionstring>"
-```
-
-### Deploy order dispatcher backend
-Assuming container images has been built using the dockerfile in PizzaWeb and pushed to Dockerhub.
-
-```
-az containerapp create --name order-processor-http --resource-group %RESOURCE_GROUP% --environment %CONTAINERAPPS_ENVIRONMENT% --image <your docker hub account>/dotnet-pizza-backend-appinsights:latest --target-port 80 --ingress external --min-replicas 1 --max-replicas 1 --enable-dapr --dapr-app-id order-processor-http --dapr-app-port 80 --env-vars "APPLICATIONINSIGHTS_CONNECTION_STRING=<your_appinsights_connectionstring>"
-```
+Edit and run [quickstart.ps1](./quickstart.ps1)

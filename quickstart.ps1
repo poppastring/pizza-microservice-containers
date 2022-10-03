@@ -104,7 +104,7 @@ else
 }
 
 #Deploy container app revisions
-$pizzaprocessingCheck = az containerapp list --environment pizzaorderdemo2 --resource-group pizzaorderdemo2 --query "[?name=='order-processor-http']" | ConvertFrom-Json
+$pizzaprocessingCheck = az containerapp list --environment $CONTAINERAPPS_ENVIRONMENT --resource-group $RESOURCE_GROUP --query "[?name=='order-processor-http']" | ConvertFrom-Json
 $pizzaprocessingExists = $pizzaprocessingCheck.Length -gt 0
 if(!$pizzaprocessingExists)
 {
@@ -126,10 +126,10 @@ else
      
 }
 
-$pizzaprocessingCheck = az containerapp list --environment pizzaorderdemo2 --resource-group pizzaorderdemo2 --query "[?name=='order-processor-http']" | ConvertFrom-Json
+$pizzaprocessingCheck = az containerapp list --environment $CONTAINERAPPS_ENVIRONMENT --resource-group $RESOURCE_GROUP --query "[?name=='order-processor-http']" | ConvertFrom-Json
 $ORDER_PROCESSOR_HTTP_URL=$pizzaprocessingCheck.properties.Configuration.Ingress.fqdn
 #Deploy container app revisions
-$pizzawebCheck = az containerapp list --environment pizzaorderdemo2 --resource-group pizzaorderdemo2 --query "[?name=='order-web']" | ConvertFrom-Json
+$pizzawebCheck = az containerapp list --environment $CONTAINERAPPS_ENVIRONMENT --resource-group $RESOURCE_GROUP --query "[?name=='order-web']" | ConvertFrom-Json
 $pizzawebExists = $pizzawebCheck.Length -gt 0
 if(!$pizzawebExists)
 {

@@ -8,8 +8,9 @@ PizzaWeb/node_modules
 /Debug
 package-lock.json
 PizzaOrderProcessor/.vs/
-aca-dapr-components_local
+aca-dapr-components_*
 components_local_*
 PizzaOrderProcessor/Properties/serviceDependencies.local.json
 PizzaOrderProcessor/Properties/serviceDependencies.local.json.user
 quickstart_local.ps1
+create-dependencyResources_local.ps1

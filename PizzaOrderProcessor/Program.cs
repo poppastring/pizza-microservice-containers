@@ -18,6 +18,9 @@ string TOPICNAME = Environment.GetEnvironmentVariable("TOPICNAME") ?? "order";
 string stateStoreBaseUrl = $"{DAPR_HOST}:{DAPR_HTTP_PORT}/v1.0/state/{STATESTORENAME}";
 var httpClient = new HttpClient();
 httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+var pizzamemcache = new Dictionary<string, Order>();
+var cacheWriteLock = new object();
+
 
 if (app.Environment.IsDevelopment()) {app.UseDeveloperExceptionPage();}
 
@@ -30,12 +33,26 @@ app.MapGet("/dapr/subscribe", () => {
 
 // Get order by orderId
 app.MapGet("/order", (string orderId) => {
+    var order = new Order();
+    order = pizzamemcache[orderId];
+    if (pizzamemcache[orderId] == null)
+    {
+        Console.WriteLine("Web URL in /order/{orderId}: "+ $"{stateStoreBaseUrl}/{orderId}");
+        var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderId}");
+        Console.WriteLine("Println resp");
+        Console.WriteLine(resp.Result);
+        order = JsonSerializer.Deserialize<Order>(resp.Result)!;
+        lock (cacheWriteLock) 
+        {
+            pizzamemcache.Add(orderId, order);
+            var timeStamp = DateTime.Now.ToString();
+            pizzamemcache.Add(orderId+timeStamp, order);
+        }
+
+    }
     // fetch order from storage state store by orderId
-    Console.WriteLine("Web URL in /order/{orderId}: "+ $"{stateStoreBaseUrl}/{orderId}");
-    var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderId}");
-    Console.WriteLine("Println resp");
-    Console.WriteLine(resp.Result);
-    var order = JsonSerializer.Deserialize<Order>(resp.Result)!;
+
+
     return Results.Ok(order);
 });
 
@@ -43,17 +60,29 @@ app.MapGet("/order", (string orderId) => {
 app.MapPost("/order/status", async (DaprData<OrderStatus> requestData) => {
     var orderStatus = requestData.Data;
     // fetch order from storage state store by orderId
-    var orderLock = new object();
     var order = new Order();
 
+    order = pizzamemcache[orderStatus.OrderId.ToString()];
 
+    if (order == null)
+    {
         var respStr = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
         var resp = await respStr;
         order = JsonSerializer.Deserialize<Order>(resp)!;
+        lock (cacheWriteLock)
+        {
+            pizzamemcache.Add(orderStatus.OrderId.ToString(),order);
+        }
+    }
 
-        // update order status
-        
-        order.Status = orderStatus.Status;
+    
+    // update order status
+    
+    order.Status = orderStatus.Status;
+    lock (cacheWriteLock)
+    {
+        pizzamemcache.Add(orderStatus.OrderId.ToString(), order);
+    }
 
 
     // post the updated order to storage state store
@@ -92,6 +121,11 @@ app.MapPost("/order", (DaprData<Order> requestData) => {
     var state = new StringContent(orderInfoJson, Encoding.UTF8, "application/json");
     httpClient.PostAsync(stateStoreBaseUrl, state);
     Console.WriteLine("Saving Order: " + order);
+    lock (cacheWriteLock)
+    {
+        pizzamemcache.Add(order.OrderId.ToString(), order);
+    }
+
     
     return Results.Ok();
 });

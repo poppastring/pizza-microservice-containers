@@ -199,7 +199,7 @@ $('.show-cart').on("change", ".item-count", function(event) {
 });
 
 $('.submit-order').click(function(event){
-  orderNumber = getRandomInt(100);
+  orderNumber = getRandomInt(100000);
   $.post("/submitOrder", {"orderID":JSON.stringify(orderNumber),"cart":JSON.stringify(cart)}, function(){
     console.log("response received");
   });

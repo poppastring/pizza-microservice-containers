@@ -49,9 +49,7 @@ app.MapPost("/order/status", async (DaprData<OrderStatus> requestData) => {
     lock (orderLock)
     {
         var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
-        var orderTmp = JsonSerializer.Deserialize<Order>(resp.Result)!;
-        order.Cart=orderTmp.Cart;
-        order.OrderId=orderTmp.OrderId;
+        order = JsonSerializer.Deserialize<Order>(resp.Result)!;
     }
     // update order status
     lock (orderLock)

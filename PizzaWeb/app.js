@@ -46,7 +46,8 @@ let PUBSUBNAME = process.env.PUBSUBNAME || "pubsub";
 let TOPICNAME = process.env.TOPICNAME || "order";
 // publish endpoint: http://localhost:<daprPort>/v1.0/publish/<pubsubname>/<topic>[?<metadata>]
 const pubsubEndpoint = `${DAPR_HOST}:${DAPR_HTTP_PORT}/v1.0/publish/${PUBSUBNAME}/${TOPICNAME}`;
-let ORDER_PROCESSOR_HTTP_URL = process.env.ORDER_PROCESSOR_HTTP_URL.replace(/\r?\n|\r/g, "") || "http://localhost";
+let ORDER_PROCESSOR_HTTP_URL = process.env.ORDER_PROCESSOR_HTTP_URL|| "localhost:3001";
+ORDER_PROCESSOR_HTTP_URL = ORDER_PROCESSOR_HTTP_URL.replace(/\r?\n|\r/g, "");
 let ORDER_PROCESSOR_HTTP_PORT = process.env.ORDER_PROCESSOR_HTTP_PORT || "80";
 
 let axiosConfig = {
@@ -56,6 +57,7 @@ let axiosConfig = {
   };
 
 app.post('/submitOrder', function(req, res){
+    let orderId=JSON.parse(req.body["orderID"]);
     axios.post(pubsubEndpoint, {
         "orderId": JSON.parse(req.body["orderID"]),
         "cart": JSON.parse(req.body["cart"]),
@@ -63,6 +65,7 @@ app.post('/submitOrder', function(req, res){
     })
         .then(function (response) {
             console.log("Submitted order : " + response.config.data);
+            console.log("Order-Web app added to queue: orderId="+orderId)
         })
         .catch(function (error) {
             console.log("failed to publish message." + error);
@@ -76,17 +79,35 @@ app.get('/getOrderStatus', function(req,res){
     //axios.get(`${DAPR_HOST}:${DAPR_HTTP_PORT}/order?orderId=${OrderID}`, axiosConfig)
     console.log("logging the axios get URL: " + `https://${ORDER_PROCESSOR_HTTP_URL}/order?orderId=${OrderID}`);
     console.log("logging the correct URL: " + `https://order-processor-http.greenforest-85e9abad.westus.azurecontainerapps.io/order?orderId=22`);
-    axios.get(`https://${ORDER_PROCESSOR_HTTP_URL}/order?orderId=${OrderID}`)
+    if(process.env.ORDER_PROCESSOR_HTTP_URL==null)
+    {
+        axios.get(`http://${ORDER_PROCESSOR_HTTP_URL}/order?orderId=${OrderID}`)
+        .then(function(response){
+            console.log("is response body null: ", response.body == null);
+            console.log(`statusCode: ${response.status}`);
+            console.log(response.data["status"]);
+            res.send(response.data["status"])
+        })
+        .catch(function(error){
+            console.log("failed to fetch for order status: "+error);
+        })
+    }
+    else
+    {
+        axios.get(`https://${ORDER_PROCESSOR_HTTP_URL}/order?orderId=${OrderID}`)
+        .then(function(response){
+            console.log("is response body null: ", response.body == null);
+            console.log(`statusCode: ${response.status}`);
+            console.log(response.data["status"]);
+            res.send(response.data["status"])
+        })
+        .catch(function(error){
+            console.log("failed to fetch for order status: "+error);
+        })
+    }
+
     //axios.get(`https://order-processor-http.greenforest-85e9abad.westus.azurecontainerapps.io/order?orderId=22`)
-    .then(function(response){
-        console.log("is response body null: ", response.body == null);
-        console.log(`statusCode: ${response.status}`);
-        console.log(response.data["status"]);
-        res.send(response.data["status"])
-    })
-    .catch(function(error){
-        console.log("failed to fetch for order status: "+error);
-    })
+
 
 });
 

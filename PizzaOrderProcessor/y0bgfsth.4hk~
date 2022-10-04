@@ -36,7 +36,7 @@ app.MapGet("/order", (string orderId) => {
     var order = new Order();
 
 
-    if (!pizzamemcache.TryGetValue(orderId, out order))
+    if (pizzamemcache.TryGetValue(orderId, out order))
     {
         Console.WriteLine("Web URL in /order/{orderId}: "+ $"{stateStoreBaseUrl}/{orderId}");
         // fetch order from storage state store by orderId
@@ -49,8 +49,8 @@ app.MapGet("/order", (string orderId) => {
             lock (cacheReadLock)
             {
                 var ordertmp=new Order();
-
-                if (!pizzamemcache.TryGetValue(orderId, out ordertmp))
+                pizzamemcache.TryGetValue(orderId, out ordertmp);
+                if (ordertmp == null)
                 {
                     pizzamemcache.Add(orderId, order);
                     var timeStamp = DateTime.Now.ToString();
@@ -75,14 +75,13 @@ app.MapPost("/order/status", async (DaprData<OrderStatus> requestData) => {
 
     lock (cacheReadLock)
     {
-        if (!pizzamemcache.TryGetValue(orderStatus.OrderId.ToString(), out order))
+        if (pizzamemcache.TryGetValue(orderStatus.OrderId.ToString(), out order))
         {
             // fetch order from storage state store by orderId
             var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
             order = JsonSerializer.Deserialize<Order>(resp.Result)!;
             lock (cacheWriteLock)
             {
-                pizzamemcache.Remove(orderStatus.OrderId.ToString());
                 pizzamemcache.Add(orderStatus.OrderId.ToString(), order);
 
 

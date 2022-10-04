@@ -10,15 +10,15 @@ Param(
 )
 
 #Environment variables
-$SUBSCRIPTION_ID="9de7ded6-0ad3-43e6-87b8-17d93e3ff695"
-$DOCKERHUB_USERNAME="cathyxwang"
-$RESOURCE_GROUP="PizzaOrderDemo3"
-$LOCATION="centralus"
-$CONTAINERAPPS_ENVIRONMENT="pizzaorderdemo3"
-$DAPR_INSTRUMENTATION_KEY="39f6f103-a3c2-4d38-a24e-3468da850aba"
-$LOGANALYTICS_WORKSPACE_ID="64d04329-08b5-4a54-b837-16ce633091ab"
-$LOGS_WORKSPACE_KEY="6U0XEefXN1DqGTMhOELM7BHG/4C6+cUC1LOByaq5Zg50ZgJBMECp/41zxs3PN3o183Gk26FnzfkntWRT8gmF0w=="
-$APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=39f6f103-a3c2-4d38-a24e-3468da850aba;IngestionEndpoint=https://centralus-2.in.applicationinsights.azure.com/;LiveEndpoint=https://centralus.livediagnostics.monitor.azure.com/"
+$SUBSCRIPTION_ID=""
+$DOCKERHUB_USERNAME=""
+$RESOURCE_GROUP=""
+$LOCATION=""
+$CONTAINERAPPS_ENVIRONMENT=""
+$DAPR_INSTRUMENTATION_KEY=""
+$LOGANALYTICS_WORKSPACE_ID=""
+$LOGS_WORKSPACE_KEY=""
+$APPLICATIONINSIGHTS_CONNECTION_STRING=""
 $ORDER_PROCESSOR_HTTP_URL=""
 
 #Connnect to an Azure subscription
@@ -119,7 +119,7 @@ else
     {
         $revisionSuffix = $((get-date).toString("yyyy-mm-dd-hhmmss"))
         Write-output "Creating containerapp order-processor-http revision with suffix $revisionSuffix"
-        az containerapp update --name order-processor-http --resource-group $RESOURCE_GROUP --image $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights-debug:latest --revision-suffix $revisionSuffix
+        az containerapp update --name order-processor-http --container-name order-processor-http --resource-group $RESOURCE_GROUP --image $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights-debug:latest --revision-suffix $revisionSuffix
     }
     else
     {
@@ -136,7 +136,7 @@ $pizzawebExists = $pizzawebCheck.Length -gt 0
 if(!$pizzawebExists)
 {
     Write-Output "Creating containerapp order-web ..."
-    az containerapp create --name order-web --resource-group $RESOURCE_GROUP --environment $CONTAINERAPPS_ENVIRONMENT  --image $DOCKERHUB_USERNAME/node-pizza-web-appinsights-debug:latest --target-port 3000 --ingress external --min-replicas 1 --max-replicas 1 --enable-dapr --dapr-app-id order-web --dapr-app-port 3000 --env-vars `APPLICATIONINSIGHTS_CONNECTION_STRING=$APPLICATIONINSIGHTS_CONNECTION_STRING ORDER_PROCESSOR_HTTP_URL=$ORDER_PROCESSOR_HTTP_URL`
+    az containerapp create --name order-web --container-name order-web --resource-group $RESOURCE_GROUP --environment $CONTAINERAPPS_ENVIRONMENT  --image $DOCKERHUB_USERNAME/node-pizza-web-appinsights-debug:latest --target-port 3000 --ingress external --min-replicas 1 --max-replicas 1 --enable-dapr --dapr-app-id order-web --dapr-app-port 3000 --env-vars `APPLICATIONINSIGHTS_CONNECTION_STRING=$APPLICATIONINSIGHTS_CONNECTION_STRING ORDER_PROCESSOR_HTTP_URL=$ORDER_PROCESSOR_HTTP_URL`
 }
 else
 {

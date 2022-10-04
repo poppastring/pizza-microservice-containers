@@ -1,0 +1,88 @@
+kind: containerapp
+name: order-processor-http
+resourceGroup: <resource_group_name>
+type: Microsoft.App/containerApps
+location: westus3
+properties:
+  configuration:
+    activeRevisionsMode: Single
+    dapr:
+      appId: order-processor-http
+      appPort: 80
+      appProtocol: http
+      enabled: true
+    ingress:
+      allowInsecure: false
+      external: true
+      targetPort: 80
+    secrets:
+      - name: storagekey
+        value: <YOUR STORAGE KEY>
+  managedEnvironmentId: <Container app env resource ID>
+  template:
+    revisionSuffix: ""
+    volumes:
+      - name: 'diagport'
+        storageType: 'EmptyDir'
+    containers:
+      - image: cathyxwang/dotnet-pizza-backend-appinsights:latest
+        name: order-processor-http
+        probes: []
+        resources:
+          cpu: 0.5
+          ephemeralStorage: ""
+          memory: 1Gi
+        volumeMounts:
+          - mountPath: '/diagport'
+            volumeName: 'diagport'
+        env:
+          - name: 'DOTNET_DiagnosticPorts'
+            value: '/diagport/port.sock'
+          - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+            value: <Connection string>
+      - image: mcr.microsoft.com/dotnet/nightly/monitor:7.0.0-rc.1
+        name: 'dotnet-monitor'
+        volumeMounts:
+          - mountPath: '/diagport'
+            volumeName: 'diagport'
+        command: 
+          - dotnet-monitor
+        args:
+          - collect
+          - --no-auth
+        env:
+          - name: 'DotnetMonitor_DiagnosticPort__ConnectionMode'
+            value: 'Listen'
+          - name: 'DotnetMonitor_Storage__DumpTempFolder'
+            value: '/diagport'
+          - name: 'DotnetMonitor_Urls'
+            value: 'http://*:52323'
+          - name: 'DotnetMonitor_DiagnosticPort__EndpointName'
+            value: '/diagport/port.sock'
+          - name: 'Egress__AzureBlobStorage__monitorBlob__AccountUri'
+            value: 'https://wikpizzastorage.blob.core.windows.net'
+          - name: 'Egress__AzureBlobStorage__monitorBlob__ContainerName'
+            value: 'dotnet-monitor'
+          - name: 'Egress__AzureBlobStorage__monitorBlob__BlobPrefix'
+            value: 'artifacts'
+          - name: 'Egress__AzureBlobStorage__monitorBlob__AccountKey'
+            secretRef: storagekey
+          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Type'
+            value: 'EventCounter'
+          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__ProviderName'
+            value: 'System.Runtime'
+          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__CounterName'
+            value: 'threadpool-queue-length' #threadpool-queue-length
+          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__LessThan'
+            value: '100'
+          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__SlidingWindowDuration'
+            value: '00:00:10'
+          - name: 'CollectionRules__ThreadPoolQueuing__Actions__0__Type'
+            value: 'CollectGCDump'
+          - name: 'CollectionRules__ThreadPoolQueuing__Limits__ActionCount'
+            value: '1'
+          - name: 'CollectionRules__ThreadPoolQueuing__Actions__0__Settings__Egress'
+            value: 'monitorBlob'
+    scale:
+      maxReplicas: 1
+      minReplicas: 1

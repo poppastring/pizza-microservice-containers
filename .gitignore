@@ -13,4 +13,6 @@ components_local_*
 PizzaOrderProcessor/Properties/serviceDependencies.local.json
 PizzaOrderProcessor/Properties/serviceDependencies.local.json.user
 quickstart_local.ps1
+quickstart_local_debugDemo.ps1
 create-dependencyResources_local.ps1
+app_local.yaml

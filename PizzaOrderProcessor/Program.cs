@@ -20,6 +20,7 @@ var httpClient = new HttpClient();
 httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 var pizzamemcache = new Dictionary<string, Order>();
 var cacheWriteLock = new object();
+var cacheReadLock = new object();
 
 if (app.Environment.IsDevelopment()) {app.UseDeveloperExceptionPage();}
 
@@ -37,19 +38,27 @@ app.MapGet("/order", (string orderId) => {
     if (pizzamemcache[orderId] == null)
     {
         Console.WriteLine("Web URL in /order/{orderId}: "+ $"{stateStoreBaseUrl}/{orderId}");
+        // fetch order from storage state store by orderId
         var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderId}");
         Console.WriteLine("Println resp");
         Console.WriteLine(resp.Result);
         order = JsonSerializer.Deserialize<Order>(resp.Result)!;
         lock (cacheWriteLock) 
         {
-            pizzamemcache.Add(orderId, order);
-            var timeStamp = DateTime.Now.ToString();
-            pizzamemcache.Add(orderId+timeStamp, order);
+            lock (cacheReadLock)
+            {
+                if (pizzamemcache[orderId] == null)
+                {
+                    pizzamemcache.Add(orderId, order);
+                    var timeStamp = DateTime.Now.ToString();
+                    pizzamemcache.Add(orderId+timeStamp, order);
+                }
+            }
+
         }
 
     }
-    // fetch order from storage state store by orderId
+
 
 
     return Results.Ok(order);
@@ -58,32 +67,35 @@ app.MapGet("/order", (string orderId) => {
 // Update order status by orderId
 app.MapPost("/order/status", async (DaprData<OrderStatus> requestData) => {
     var orderStatus = requestData.Data;
-    // fetch order from storage state store by orderId
-    var objectUpdateLock = new object();
+
     var order = new Order();
 
-    lock (objectUpdateLock)
+    lock (cacheReadLock)
     {
         order = pizzamemcache[orderStatus.OrderId.ToString()];
         if (order == null)
         {
+            // fetch order from storage state store by orderId
             var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderStatus.OrderId.ToString()}");
             order = JsonSerializer.Deserialize<Order>(resp.Result)!;
             lock (cacheWriteLock)
             {
                 pizzamemcache.Add(orderStatus.OrderId.ToString(), order);
-                lock (objectUpdateLock)
-                {
-                    // update order status
-                    order.Status = orderStatus.Status;
-                    lock (cacheWriteLock)
-                    {
-                        pizzamemcache.Add(orderStatus.OrderId.ToString(), order);
-                    }
-                }
+
+
             }
         }
+        // update order status
+        order.Status = orderStatus.Status;
+        lock (cacheWriteLock)
+        {
+            pizzamemcache.Add(orderStatus.OrderId.ToString(), order);
+        }
+
     }
+
+
+
 
     // post the updated order to storage state store
 

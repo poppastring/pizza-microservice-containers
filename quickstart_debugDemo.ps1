@@ -5,6 +5,7 @@
 #Switch parameter
 Param(
     [switch]$noAzureLogin,
+    [switch]$noDockerLogin,
     [switch]$noDockerBuildWeb,
     [switch]$noDockerBuildProcessor
 )
@@ -20,6 +21,12 @@ $LOGANALYTICS_WORKSPACE_ID=""
 $LOGS_WORKSPACE_KEY=""
 $APPLICATIONINSIGHTS_CONNECTION_STRING=""
 $ORDER_PROCESSOR_HTTP_URL=""
+
+#Login to Docker for publishing images
+if(!$noDockerLogin)
+{
+    docker login
+}
 
 #Connnect to an Azure subscription
 if(!$noAzureLogin)

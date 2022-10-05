@@ -16,3 +16,5 @@ quickstart_local.ps1
 quickstart_local_debugDemo.ps1
 create-dependencyResources_local.ps1
 app_local.yaml
+*_local.ps1
+*_local.yaml

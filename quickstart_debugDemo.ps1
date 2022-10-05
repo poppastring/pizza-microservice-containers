@@ -117,7 +117,7 @@ $pizzaprocessingExists = $pizzaprocessingCheck.Length -gt 0
 if(!$pizzaprocessingExists)
 {
     Write-Output "Creating containerapp order-processor-http ..."
-    az containerapp create --name order-processor-http --resource-group $RESOURCE_GROUP --yaml app.yaml
+    az containerapp create --name order-processor-http --resource-group $RESOURCE_GROUP --yaml app_test_local.yaml
 
 }
 else
@@ -126,7 +126,8 @@ else
     {
         $revisionSuffix = $((get-date).toString("yyyy-mm-dd-hhmmss"))
         Write-output "Creating containerapp order-processor-http revision with suffix $revisionSuffix"
-        az containerapp update --name order-processor-http --container-name order-processor-http --resource-group $RESOURCE_GROUP --image $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights-debug:latest --revision-suffix $revisionSuffix
+        #az containerapp update --name order-processor-http --resource-group $RESOURCE_GROUP --image $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights-debug:latest --revision-suffix $revisionSuffix
+        az containerapp update --name order-processor-http --resource-group $RESOURCE_GROUP --revision-suffix $revisionSuffix --yaml app_test_local.yaml
     }
     else
     {
@@ -143,7 +144,7 @@ $pizzawebExists = $pizzawebCheck.Length -gt 0
 if(!$pizzawebExists)
 {
     Write-Output "Creating containerapp order-web ..."
-    az containerapp create --name order-web --container-name order-web --resource-group $RESOURCE_GROUP --environment $CONTAINERAPPS_ENVIRONMENT  --image $DOCKERHUB_USERNAME/node-pizza-web-appinsights-debug:latest --target-port 3000 --ingress external --min-replicas 1 --max-replicas 1 --enable-dapr --dapr-app-id order-web --dapr-app-port 3000 --env-vars `APPLICATIONINSIGHTS_CONNECTION_STRING=$APPLICATIONINSIGHTS_CONNECTION_STRING ORDER_PROCESSOR_HTTP_URL=$ORDER_PROCESSOR_HTTP_URL`
+    az containerapp create --name order-web --resource-group $RESOURCE_GROUP --environment $CONTAINERAPPS_ENVIRONMENT  --image $DOCKERHUB_USERNAME/node-pizza-web-appinsights-debug:latest --target-port 3000 --ingress external --min-replicas 1 --max-replicas 1 --enable-dapr --dapr-app-id order-web --dapr-app-port 3000 --env-vars `APPLICATIONINSIGHTS_CONNECTION_STRING=$APPLICATIONINSIGHTS_CONNECTION_STRING ORDER_PROCESSOR_HTTP_URL=$ORDER_PROCESSOR_HTTP_URL`
 }
 else
 {

@@ -1,8 +1,8 @@
 kind: containerapp
 name: order-processor-http
-resourceGroup: <resource_group_name>
+resourceGroup: <your_resource_group>
 type: Microsoft.App/containerApps
-location: westus3
+location: centralus
 properties:
   configuration:
     activeRevisionsMode: Single
@@ -17,15 +17,15 @@ properties:
       targetPort: 80
     secrets:
       - name: storagekey
-        value: <YOUR STORAGE KEY>
-  managedEnvironmentId: <Container app env resource ID>
+        value: <your_storage_key>
+  managedEnvironmentId: /subscriptions/<your_subscription>/resourceGroups/<your_resource_group>/providers/Microsoft.App/managedEnvironments/<your_ACA_env_name>
   template:
     revisionSuffix: ""
     volumes:
       - name: 'diagport'
         storageType: 'EmptyDir'
     containers:
-      - image: cathyxwang/dotnet-pizza-backend-appinsights:latest
+      - image: cathyxwang/dotnet-pizza-backend-appinsights-debug:latest
         name: order-processor-http
         probes: []
         resources:
@@ -39,7 +39,7 @@ properties:
           - name: 'DOTNET_DiagnosticPorts'
             value: '/diagport/port.sock'
           - name: APPLICATIONINSIGHTS_CONNECTION_STRING
-            value: <Connection string>
+            value: your_appinsights_connectionstring
       - image: mcr.microsoft.com/dotnet/nightly/monitor:7.0.0-rc.1
         name: 'dotnet-monitor'
         volumeMounts:
@@ -60,7 +60,7 @@ properties:
           - name: 'DotnetMonitor_DiagnosticPort__EndpointName'
             value: '/diagport/port.sock'
           - name: 'Egress__AzureBlobStorage__monitorBlob__AccountUri'
-            value: 'https://wikpizzastorage.blob.core.windows.net'
+            value: 'https://<your_storage_account>.blob.core.windows.net'
           - name: 'Egress__AzureBlobStorage__monitorBlob__ContainerName'
             value: 'dotnet-monitor'
           - name: 'Egress__AzureBlobStorage__monitorBlob__BlobPrefix'
@@ -73,14 +73,14 @@ properties:
             value: 'System.Runtime'
           - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__CounterName'
             value: 'threadpool-queue-length' #threadpool-queue-length
-          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__LessThan'
-            value: '100'
-          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__SlidingWindowDuration'
-            value: '00:00:10'
-          - name: 'CollectionRules__ThreadPoolQueuing__Actions__0__Type'
-            value: 'CollectGCDump'
-          - name: 'CollectionRules__ThreadPoolQueuing__Limits__ActionCount'
+          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__GreaterThan'
             value: '1'
+          - name: 'CollectionRules__ThreadPoolQueuing__Trigger__Settings__SlidingWindowDuration'
+            value: '00:00:05'
+          - name: 'CollectionRules__ThreadPoolQueuing__Actions__0__Type'
+            value: 'CollectDump'
+          - name: 'CollectionRules__ThreadPoolQueuing__Limits__ActionCount'
+            value: '5'
           - name: 'CollectionRules__ThreadPoolQueuing__Actions__0__Settings__Egress'
             value: 'monitorBlob'
     scale:

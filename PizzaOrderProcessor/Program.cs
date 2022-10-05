@@ -40,10 +40,10 @@ app.MapGet("/order", (string orderId) => {
     {
         Console.WriteLine("Web URL in /order/{orderId}: "+ $"{stateStoreBaseUrl}/{orderId}");
         // fetch order from storage state store by orderId
-        var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderId}");
+        var resp = httpClient.GetStringAsync($"{stateStoreBaseUrl}/{orderId}").Result;
         Console.WriteLine("Println resp");
-        Console.WriteLine(resp.Result);
-        order = JsonSerializer.Deserialize<Order>(resp.Result)!;
+        Console.WriteLine(resp);
+        order = JsonSerializer.Deserialize<Order>(resp)!;
         lock (cacheWriteLock) 
         {
             lock (cacheReadLock)

@@ -56,6 +56,7 @@ let axiosConfig = {
   };
 
 app.post('/submitOrder', function(req, res){
+    var orderId = req.body["orderID"];
     axios.post(pubsubEndpoint, {
         "orderId": JSON.parse(req.body["orderID"]),
         "cart": JSON.parse(req.body["cart"]),
@@ -63,6 +64,7 @@ app.post('/submitOrder', function(req, res){
     })
         .then(function (response) {
             console.log("Submitted order : " + response.config.data);
+            console.log("Added message to queue. OrderId="+orderId);
         })
         .catch(function (error) {
             console.log("failed to publish message." + error);
@@ -74,8 +76,6 @@ app.get('/getOrderStatus', function(req,res){
     console.log("outputting the req order ID: "+ JSON.stringify(req.query["OrderID"]));
     var OrderID = req.query["OrderID"];
     //axios.get(`${DAPR_HOST}:${DAPR_HTTP_PORT}/order?orderId=${OrderID}`, axiosConfig)
-    console.log("logging the axios get URL: " + `https://${ORDER_PROCESSOR_HTTP_URL}/order?orderId=${OrderID}`);
-    console.log("logging the correct URL: " + `https://order-processor-http.greenforest-85e9abad.westus.azurecontainerapps.io/order?orderId=22`);
     axios.get(`https://${ORDER_PROCESSOR_HTTP_URL}/order?orderId=${OrderID}`)
     //axios.get(`https://order-processor-http.greenforest-85e9abad.westus.azurecontainerapps.io/order?orderId=22`)
     .then(function(response){

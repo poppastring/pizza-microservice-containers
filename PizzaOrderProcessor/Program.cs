@@ -77,6 +77,7 @@ app.MapPost("/order", (DaprData<Order> requestData) => {
     var state = new StringContent(orderInfoJson, Encoding.UTF8, "application/json");
     httpClient.PostAsync(stateStoreBaseUrl, state);
     Console.WriteLine("Saving Order: " + order);
+    Console.WriteLine("Processed message in queue. orderId=" + order.OrderId.ToString());
     
     return Results.Ok();
 });

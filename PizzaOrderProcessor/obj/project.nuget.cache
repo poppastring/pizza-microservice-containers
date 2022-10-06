@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "h2d+VnMQ960mj95+4ZxOsMWV/HSKJdQHXpTCGv22RU5qWIGhB/IuXNqcKe/4WLifL0gvCW31dibNcwySif5NYw==",
+  "dgSpecHash": "82UxHCRDfP/A0J62tkYd/i0aR5WR5LyCRPj+JcRXDgiBrW1gcKVRqQZZ0RU4iDNf7p7NszF5+F6KIM5Rk3275A==",
   "success": true,
   "projectFilePath": "C:\\Users\\cawa\\source\\repos\\pizza-microservice-containers\\PizzaOrderProcessor\\PizzaOrderProcessor.csproj",
   "expectedPackageFiles": [
@@ -25,6 +25,7 @@
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.aspnetcore.http.features\\2.1.1\\microsoft.aspnetcore.http.features.2.1.1.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.aspnetcore.webutilities\\2.1.1\\microsoft.aspnetcore.webutilities.2.1.1.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
+    "C:\\Users\\cawa\\.nuget\\packages\\microsoft.build.tasks.git\\1.1.1\\microsoft.build.tasks.git.1.1.1.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.diagnostics.netcore.client\\0.2.137102\\microsoft.diagnostics.netcore.client.0.2.137102.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
@@ -59,6 +60,8 @@
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\cawa\\.nuget\\packages\\microsoft.sourcelink.common\\1.1.1\\microsoft.sourcelink.common.1.1.1.nupkg.sha512",
+    "C:\\Users\\cawa\\.nuget\\packages\\microsoft.sourcelink.github\\1.1.1\\microsoft.sourcelink.github.1.1.1.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.17.0\\microsoft.visualstudio.azure.containers.tools.targets.1.17.0.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",
     "C:\\Users\\cawa\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",

@@ -28,9 +28,15 @@
     <Import Project="$(NuGetPackageRoot)microsoft.extensions.apidescription.server\3.0.0\build\Microsoft.Extensions.ApiDescription.Server.props" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.apidescription.server\3.0.0\build\Microsoft.Extensions.ApiDescription.Server.props')" />
     <Import Project="$(NuGetPackageRoot)swashbuckle.aspnetcore\6.2.3\build\Swashbuckle.AspNetCore.props" Condition="Exists('$(NuGetPackageRoot)swashbuckle.aspnetcore\6.2.3\build\Swashbuckle.AspNetCore.props')" />
     <Import Project="$(NuGetPackageRoot)microsoft.visualstudio.azure.containers.tools.targets\1.17.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.props" Condition="Exists('$(NuGetPackageRoot)microsoft.visualstudio.azure.containers.tools.targets\1.17.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.sourcelink.common\1.1.1\build\Microsoft.SourceLink.Common.props" Condition="Exists('$(NuGetPackageRoot)microsoft.sourcelink.common\1.1.1\build\Microsoft.SourceLink.Common.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.build.tasks.git\1.1.1\build\Microsoft.Build.Tasks.Git.props" Condition="Exists('$(NuGetPackageRoot)microsoft.build.tasks.git\1.1.1\build\Microsoft.Build.Tasks.Git.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.sourcelink.github\1.1.1\build\Microsoft.SourceLink.GitHub.props" Condition="Exists('$(NuGetPackageRoot)microsoft.sourcelink.github\1.1.1\build\Microsoft.SourceLink.GitHub.props')" />
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <PkgMicrosoft_Extensions_ApiDescription_Server Condition=" '$(PkgMicrosoft_Extensions_ApiDescription_Server)' == '' ">C:\Users\cawa\.nuget\packages\microsoft.extensions.apidescription.server\3.0.0</PkgMicrosoft_Extensions_ApiDescription_Server>
     <PkgMicrosoft_VisualStudio_Azure_Containers_Tools_Targets Condition=" '$(PkgMicrosoft_VisualStudio_Azure_Containers_Tools_Targets)' == '' ">C:\Users\cawa\.nuget\packages\microsoft.visualstudio.azure.containers.tools.targets\1.17.0</PkgMicrosoft_VisualStudio_Azure_Containers_Tools_Targets>
+    <PkgMicrosoft_SourceLink_Common Condition=" '$(PkgMicrosoft_SourceLink_Common)' == '' ">C:\Users\cawa\.nuget\packages\microsoft.sourcelink.common\1.1.1</PkgMicrosoft_SourceLink_Common>
+    <PkgMicrosoft_Build_Tasks_Git Condition=" '$(PkgMicrosoft_Build_Tasks_Git)' == '' ">C:\Users\cawa\.nuget\packages\microsoft.build.tasks.git\1.1.1</PkgMicrosoft_Build_Tasks_Git>
+    <PkgMicrosoft_SourceLink_GitHub Condition=" '$(PkgMicrosoft_SourceLink_GitHub)' == '' ">C:\Users\cawa\.nuget\packages\microsoft.sourcelink.github\1.1.1</PkgMicrosoft_SourceLink_GitHub>
   </PropertyGroup>
 </Project>

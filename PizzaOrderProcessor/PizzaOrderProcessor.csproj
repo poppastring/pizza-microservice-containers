@@ -8,6 +8,10 @@
     <DockerfileContext>.</DockerfileContext>
     <ApplicationInsightsResourceId>/subscriptions/9de7ded6-0ad3-43e6-87b8-17d93e3ff695/resourceGroups/acadaprtest-appinsights/providers/microsoft.insights/components/acadaprtest</ApplicationInsightsResourceId>
     <UserSecretsId>0c6d50ed-7a6e-4ffd-ab84-80b96dd1da71</UserSecretsId>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<EmbedUntrackedSources>true</EmbedUntrackedSources>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +19,7 @@
     <PackageReference Include="Microsoft.ApplicationInsights.Profiler.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
 
 </Project>

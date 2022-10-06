@@ -3,5 +3,8 @@
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)microsoft.extensions.apidescription.server\3.0.0\build\Microsoft.Extensions.ApiDescription.Server.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.apidescription.server\3.0.0\build\Microsoft.Extensions.ApiDescription.Server.targets')" />
     <Import Project="$(NuGetPackageRoot)microsoft.visualstudio.azure.containers.tools.targets\1.17.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.visualstudio.azure.containers.tools.targets\1.17.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.sourcelink.common\1.1.1\build\Microsoft.SourceLink.Common.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.sourcelink.common\1.1.1\build\Microsoft.SourceLink.Common.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.build.tasks.git\1.1.1\build\Microsoft.Build.Tasks.Git.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.build.tasks.git\1.1.1\build\Microsoft.Build.Tasks.Git.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.sourcelink.github\1.1.1\build\Microsoft.SourceLink.GitHub.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.sourcelink.github\1.1.1\build\Microsoft.SourceLink.GitHub.targets')" />
   </ImportGroup>
 </Project>

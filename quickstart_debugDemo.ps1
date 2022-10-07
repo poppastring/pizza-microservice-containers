@@ -48,7 +48,7 @@ if(!$noDockerBuildWeb)
 
 if(!$noDockerBuildProcessor)
 {
-    docker build -t $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights-debug ./PizzaOrderProcessor/.
+    docker build -t $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights-debug -f ./PizzaOrderProcessor/Dockerfile .
     docker push $DOCKERHUB_USERNAME/dotnet-pizza-backend-appinsights-debug
 }
 

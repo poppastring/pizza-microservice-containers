@@ -37,7 +37,7 @@ jobs:
           push: true
           tags: poppastring/order-processor-http:${{ github.sha }}
           file: ./PizzaOrderProcessor1/Dockerfile
-          context: ./PizzaOrderProcessor1/
+          context: ./
 
 
   deploy:

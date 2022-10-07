@@ -18,3 +18,6 @@ create-dependencyResources_local.ps1
 app_local.yaml
 *_local.ps1
 *_local.yaml
+/.vs
+/PizzaOrderProcessor1/obj
+/PizzaOrderProcessor1/bin/Debug/net6.0
